@@ -1,4 +1,4 @@
-# Knative Tutorial
+# Knative Serving and oc client
 
 At the end of this chapter you will be able to :
 

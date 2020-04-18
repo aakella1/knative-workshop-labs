@@ -2,6 +2,8 @@
 
 ## Before you begin
 
+Note that this exercise is taken from [Knative Tutorials by Kamesh Sampath](https://redhat-developer-demos.github.io/knative-tutorial/knative-tutorial/index.html "Open Knative Tutorials") and my goal is to make the Knative exercises easy to consume.
+
 Make sure you check-out this repository from git and open it with [VSCode](https://code.visualstudio.com/).
 
 Instructions are based on [VSCode Didact](https://github.com/redhat-developer/vscode-didact), so make sure it's installed
