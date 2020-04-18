@@ -220,9 +220,10 @@ or hit `ctrl+c` on the terminal window.
 
 You should also notice that two pods are running representing both greeter-v1 and greeter-v2:
 ```
-$ watch kubectl get pods
+watch 'oc get pods -n knativetutorial'
 ```
-([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$watch%20kubectl%20get%20pods&completion=Run%20watch%20command. "Opens a new terminal and sends the command above"){.didact})
+
+([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$watch%20'oc%20get%20pods%20-n%20knativetutorial'&completion=Run%20watch%20command. "Opens a new terminal and sends the command above"){.didact})
 
 ```
 NAME                                     READY   STATUS    AGE

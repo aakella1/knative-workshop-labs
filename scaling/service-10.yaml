@@ -1,16 +1,16 @@
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-  name: prime-generator
+  name: greeter
 spec:
   template:
     metadata:
       annotations:
         # Target 10 in-flight-requests per pod.
-        autoscaling.knative.dev/target: "10"
+        autoscaling.knative.dev/target: "1"
     spec:
       containers:
-      - image: quay.io/rhdevelopers/prime-generator:v27-quarkus
+      - image: quay.io/rhdevelopers/knative-tutorial-greeter:quarkus
         livenessProbe:
           httpGet:
             path: /healthz
