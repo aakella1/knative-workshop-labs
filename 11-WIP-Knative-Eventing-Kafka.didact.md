@@ -1,210 +1,61 @@
-Knative Tutorial
-This tutorial helps in undertanding some advanced concepts and application with Knative Serving, Eventing and Apache Camel-k
+# Apache Kafka Events with Knative Eventing
 
-Knative Tutorial
-Deploying Apache Kafka Cluster
-As part of the upcoming section of this chapter, we will be deploying a Knative Source, that will respond to Apache Kafka Topic messages(events). Before getting to other exercises, we need to first deploy Apache Kafka inside in your Kubernetes cluster.
-
-The strimzi Kubernetes operator can be used to deploy the Apache Kafka Cluster in your Kubernetes cluster.
-
-Before beginning to run the exercises, navigate to the tutorial chapter’s eventing folder:
-
-cd $TUTORIAL_HOME/eventing
-
-Run the following command to create the kafka namespace and deploy Apache Kafka into it:
-
-kubectl
-
-oc
-
-endif::[]\
-
-oc create namespace kafka &&\
-curl -L \
-https://github.com/strimzi/strimzi-kafka-operator\
-/releases/download/v0.16.2/strimzi-cluster-operator-v0.16.2.yaml \
-  | sed 's/namespace: .*/namespace: kafka/' \
-  | oc apply -n kafka -f -
-
-Wait for the strimzi-cluster-operator to be running:
-
-kubectl
-
-oc
-
-watch oc get pods -n kafka
-
-The command should show the following output:
-
-NAME                                        READY STATUS    AGE
-strimzi-cluster-operator-85f596bfc7-7dgds   1/1   Running   1m2s
-The strimzi operator would have installed several Apache Kafka related CRDs which can be used to create Apache Kafka core resources such as a topic, users, connectors etc., you can verify the CRDs that are available by querying api-resources:
-
-kubectl
-
-oc
-
-oc api-resources --api-group='kafka.strimzi.io'
-
-The command should show the following output:
-
-kafkabridges.kafka.strimzi.io                        2019-12-28T14:53:14Z
-kafkaconnects.kafka.strimzi.io                       2019-12-28T14:53:14Z
-kafkaconnects2is.kafka.strimzi.io                    2019-12-28T14:53:14Z
-kafkamirrormakers.kafka.strimzi.io                   2019-12-28T14:53:14Z
-kafkas.kafka.strimzi.io                              2019-12-28T14:53:14Z
-kafkatopics.kafka.strimzi.io                         2019-12-28T14:53:14Z
-kafkausers.kafka.strimzi.io                          2019-12-28T14:53:14Z
-Now with the Apache Kafka operator running, you can deploy and verify a single node Apache Kakfa cluster by running the command:
-
-kubectl
-
-oc
-
-oc -n kafka apply -f kafka-broker-my-cluster.yaml
-
-Watch the Kafka cluster deployment:
-
-oc kubectl get pods -n kafka
-
-Watch the kafka namespace for the cluster deployment:
-
-NAME                                         READY  STATUS   AGE
-my-cluster-entity-operator-7d677bdf7b-jpws7  3/3    Running  85s
-my-cluster-kafka-0                           2/2    Running  110s
-my-cluster-zookeeper-0                       2/2    Running  2m22s
-strimzi-cluster-operator-85f596bfc7-7dgds    1/1    Running  4m22s
-The Kubernetes CRD resource $TUTORIAL_HOME/eventing/kafka-broker-my-cluster.yaml, will deploy a single Zookeeper, Kafka Broker and a Entity-Operator. The Entity-Operator is responsible for managing different custom resources such as KafkaTopic and KafkaUser.
-
-Now that you have an Apache Kafka cluster deployed, you can create a Kafka Topic using the KafkaTopic CRD, the following listing shows how to create a Kafka Topic my-topic:
-
-Create Kafka Topic my-topic
-apiVersion: kafka.strimzi.io/v1beta1
-kind: KafkaTopic
-metadata:
-  name: my-topic
-  labels:
-    strimzi.io/cluster: my-cluster
-spec:
-  partitions: 10 
-  replicas: 1
-Partitions 10 allows for more concurrent scale-out of sink pods. In theory, up to 10 pods will scale-up if there are enough messages flowing through the Kafka topic.
-You can choose to skip the manual pre-creation of a KafkaTopic but the automatically generated topics will have partitions set to 1 by default.
-
-Create Kafka Topic
-kubectl
-
-oc
-
-kubectl -n kafka create -f kafka-topic-my-topic.yaml
-
-Verify the created topic:
-
-kubectl -n kafka  get kafkatopics
-
-The verify command should show the following output:
-
-NAME       PARTITIONS   REPLICATION FACTOR
-my-topic   10           1
-Verify that your Kafka Topic is working correctly by connecting a simple producer, consumer and creating some test messages. The sample code repository includes a script for producing Kafka messages called kafka-producer.sh. Execute the script and type in "one", "two", "three". Hitting enter/return after each string:
-
-Producer
-$TUTORIAL_HOME/bin/kafka-producer.sh
-
-On the terminal prompt try entering texts like:
-
->one
->two
->three
-Consumer
-You should also leverage the sample code repository’s kafka-consumer.sh script to see the message flow through the topic, open a new terminal and run:
-
-$TUTORIAL_HOME/bin/kafka-consumer.sh
-
-On the consumer terminal prompt you will receive texts like:
-
->one
->two
->three
-You can use Ctrl-c to stop producer & consumer interaction and their associated pods.
-
-Knative Tutorial
-Apache Kafka Events with Knative Eventing
 At the end of this chapter you will be able to:
 
-Using KafkaSource with Knative Eventing
+- Using KafkaSource with Knative Eventing
 
-Source Kafka Events to Sink
+- Source Kafka Events to Sink
 
-Autocaling Knative Services with Apache Kafka Events
+- Autocaling Knative Services with Apache Kafka Events
 
-Prerequisite
-The following checks ensure that each chapter exercises are done with the right environment settings.
+## 1. Prerequisite
 
-Minikube
+- Make sure you completed all the steps in the Prerequistes lab
 
-Minishift
+- Make sure the Kafka cluster is setup on OpenShift
 
-Set your local docker to use minishift docker daemon
+- Make sure to be on knativetutorial OpenShift project
 
-eval $(minishift docker-env)
+- - oc project -q
 
-OpenShift CLI should be v3.11.0+
+- If you are not on knativetutorial project, then run following command to change to knativetutorial project:
 
-eval $(minishift oc-env)
-oc version
+- - oc project knativetutorial
 
-Make sure to be on knativetutorial OpenShift project
+## 2. Deploy Knative Eventing KafkaSource
 
-oc project -q
-
-If you are not on knativetutorial project, then run following command to change to knativetutorial project:
-
-oc project knativetutorial
-
-Before beginning to run the exercises, navigate to the tutorial chapter’s eventing folder:
-
-cd $TUTORIAL_HOME/eventing
-
-Deploy Knative Eventing KafkaSource
 Knative Eventing KafkaSource need to be used to have the Kafka messages to flow through the Knative Eventing Channels. You can deploy Knative KafkaSource by running the command:
 
-kubectl
-
-oc
 
 Use the OperatorHub in OpenShift web console to install Knative Eventing Kafka operator that will install the KafkaSource.
 
-The previous step deploys Knative KafkaSource in the knative-sources namespace as well as a CRD, ServiceAccount, ClusterRole, etc. Verify that knative-source namespace includes the kafka-controller-manager-0 pod:
+More instructions at [Installing Knative Apache Kafka Operator in OpenShift](https://openshift-knative.github.io/docs/docs/proc_apache-kafka.html "To install Knative Apache Kafka Operator on OpenShift")
 
-kubectl
+The previous step deploys Knative KafkaSource in the knative-eventing namespace as well as a CRD, ServiceAccount, ClusterRole, etc. Verify that knative-eventing namespace includes the `kafka-controller-manager-0` pod:
 
-oc
-
-watch kubectl get pods -n knative-sources
+```
+watch kubectl get pods -n knative-eventing
+```
 
 The command above should show the following output:
-
+```
 NAME                         READY   STATUS    AGE
 kafka-controller-manager-0   1/1     Running   1m17s
+```
+
 You should also deploy the Knative Kafka Channel that can be used to connect the Knative Eventing Channel with a Apache Kafka cluster backend, to deploy a Knative Kafka Channel run:
 
-kubectl
-
-oc
 
 Knative Eventing Kafka operator that was done in earlier, will install Knative KafkaChannel as well.
 
 Look for 3 new pods in namespace knative-eventing with the prefix "kafka":
 
-kubectl
-
-oc
-
+```
 watch oc get pods -n knative-eventing
+```
 
 The command will shown an output like:
-
+```
 NAME                                   READY   STATUS    AGE
 eventing-controller-666b79d867-kq8cc   1/1     Running   64m
 eventing-webhook-5867c98d9b-hzctw      1/1     Running   64m
@@ -214,6 +65,8 @@ kafka-ch-controller-7c596b6b55-fzxcx   1/1     Running   33s
 kafka-ch-dispatcher-577958f994-4f2qs   1/1     Running   33s
 kafka-webhook-74bbd99f5c-c84ls         1/1     Running   33s
 sources-controller-694f8df9c4-pss2w    1/1     Running   64m
+```
+
 And you should also find some new api-resources as shown:
 
 kubectl
