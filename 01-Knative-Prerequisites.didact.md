@@ -35,5 +35,81 @@ From the VSCode UI, right-click on the `01-Knative-Prerequisites.didact.md` file
 | [Check if stern is installed](didact://?commandId=vscode.didact.cliCommandSuccessful&text=stern-requirements-status$$stern%20--version&completion=Checked%20stern%20tool%20availability "Tests to see if `stern --version` returns a 0 return code"){.didact} | *Status: unknown*{#stern-requirements-status} OPTIONAL | stern will be used for log tailing, install it using "brew install stern"
 | [Check if you're connected to an OpenShift cluster](didact://?commandId=vscode.didact.requirementCheck&text=cluster-requirements-status$$oc%20get%20project$$NAME&completion=OpenShift%20is%20connected. "Tests to see if `oc get projects` returns a result"){.didact} | *Status: unknown*{#cluster-requirements-status} OPTIONAL | You need to connect to an OpenShift cluster in order to run the examples.
 
+## 2. Preparing a new OpenShift project
 
+Open a terminal tab and type the following command:
+
+```
+oc project kameldemo
+```
+
+([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$oc%20project%20kameldemo&completion=Use%20your%20namespace. "Opens a new terminal and sends the command above"){.didact})
+
+
+## 3. Install OpenShift ServiceMesh Operator
+
+![Diagram](docs/01-01.png)
+
+![Diagram](docs/01-02.png)
+
+![Diagram](docs/01-03.png)
+
+![Diagram](docs/01-04.png)
+
+![Diagram](docs/01-05.png)
+
+## 4. Install OpenShift Serverless Operator
+
+`oc create project knative-serving`
+
+![Diagram](docs/01-01.png)
+
+![Diagram](docs/01-06.png)
+
+![Diagram](docs/01-07.png)
+
+![Diagram](docs/01-08.png)
+
+![Diagram](docs/01-09.png)
+
+![Diagram](docs/01-18.png)
+Click on the "Knative Serving Operator"
+
+![Diagram](docs/01-19.png)
+
+![Diagram](docs/01-20.png)
+
+![Diagram](docs/01-21.png)
+
+![Diagram](docs/01-22.png)
+
+Give it 5 minutes, you should see the knative-serving operator in "Installed Operators"
+
+![Diagram](docs/01-23.png)
+
+Click on the "Knative serving" resource and scroll to the end
+
+![Diagram](docs/01-24.png)
+
+
+
+## 5. Install Camel-K Operator
+
+![Diagram](docs/01-01.png)
+
+![Diagram](docs/01-10.png)
+
+![Diagram](docs/01-11.png)
+
+![Diagram](docs/01-12.png)
+
+![Diagram](docs/01-13.png)
+
+![Diagram](docs/01-14.png)
+
+![Diagram](docs/01-15.png)
+
+![Diagram](docs/01-16.png)
+
+![Diagram](docs/01-17.png)
 
