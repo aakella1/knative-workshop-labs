@@ -91,9 +91,32 @@ Click on the "Knative serving" resource and scroll to the end
 
 ![Diagram](docs/01-24.png)
 
+## 5. Install Knative-Eventing Operator
+
+![Diagram](docs/01-25.png)
+
+![Diagram](docs/01-26.png)
+
+![Diagram](docs/01-27.png)
+
+![Diagram](docs/01-28.png)
+
+![Diagram](docs/01-29.png)
+
+![Diagram](docs/01-30.png)
+
+Click on the "Knative Eventing Operator"
+
+![Diagram](docs/01-31.png)
+
+![Diagram](docs/01-32.png)
+
+![Diagram](docs/01-33.png)
+
+![Diagram](docs/01-34.png)
 
 
-## 5. Install Camel-K Operator
+## 6. Install Camel-K Operator
 
 ![Diagram](docs/01-01.png)
 
