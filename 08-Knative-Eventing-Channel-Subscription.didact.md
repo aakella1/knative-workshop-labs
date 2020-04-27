@@ -159,9 +159,9 @@ oc apply -n knativetutorial -f eventing/channel-subscriber.yaml
 ```
 ([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$oc%20--namespace%20knativetutorial%20delete%20-f%20eventing/channel-subscriber.yaml&completion=Run%20oc%20delete%20kn-services%20command. "Opens a new terminal and sends the command above"){.didact})
 ```
-oc -n knativetutorial delete -f eventing-hello-sub.yaml
+oc -n knativetutorial delete -f eventing/eventing-hello-sub.yaml
 ```
-([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$oc%20--namespace%20knativetutorial%20delete%20-f%20eventing/eventinghello-sub.yaml&completion=Run%20oc%20delete%20kn-services%20command. "Opens a new terminal and sends the command above"){.didact})
+([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$oc%20--namespace%20knativetutorial%20delete%20-f%20eventing/eventing-hello-sub.yaml&completion=Run%20oc%20delete%20kn-services%20command. "Opens a new terminal and sends the command above"){.didact})
 ```
 oc -n knativetutorial delete -f eventinghello-source-ch.yaml
 ```

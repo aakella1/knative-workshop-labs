@@ -40,7 +40,7 @@ From the VSCode UI, right-click on the `01-Knative-Prerequisites.didact.md` file
 Open a terminal tab and type the following command:
 
 ```
-oc project kameldemo
+oc project knativetutorial
 ```
 
 ([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$oc%20project%20kameldemo&completion=Use%20your%20namespace. "Opens a new terminal and sends the command above"){.didact})
@@ -136,3 +136,14 @@ Click on the "Knative Eventing Operator"
 
 ![Diagram](docs/01-17.png)
 
+## 7. Install AMQ Streams Operator
+
+![Diagram](docs/01-01.png)
+
+![Diagram](docs/01-35.png)
+
+![Diagram](docs/01-36.png)
+
+![Diagram](docs/01-37.png)
+
+![Diagram](docs/01-38.png)

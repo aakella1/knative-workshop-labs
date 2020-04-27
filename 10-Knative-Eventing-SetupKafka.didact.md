@@ -1,152 +1,87 @@
 # Knative Advanced Tutorial
-This tutorial helps in undertanding some advanced concepts and application with Knative Serving, Eventing and Apache Camel-k
 
-## 1. Deploying Apache Kafka Cluster
-As part of the upcoming section of this chapter, we will be deploying a Knative Source, that will respond to Apache Kafka Topic messages(events). Before getting to other exercises, we need to first deploy Apache Kafka inside in your Kubernetes cluster.
+In this exercise, you will use `Apache Kafka`, a distributed streaming platform. You will also use `Strimzi`, which provides an easy way to run an Apache Kafka cluster on Kubernetes using `Operators`.
 
-The strimzi Kubernetes operator can be used to deploy the Apache Kafka Cluster in your Kubernetes cluster.
+## 1. What is Apache Kafka?
 
-Run the following command to create the kafka namespace and deploy Apache Kafka into it:
+Apache Kafka is a distributed streaming platform. A streaming platform has three key capabilities:
 
-```
-oc create namespace kafka
-```
+- Publish and subscribe to streams of records, similar to a message queue or enterprise messaging system.
 
-```
-curl -L https://github.com/strimzi/strimzi-kafka-operator/releases/download/v0.16.2/strimzi-cluster-operator-v0.16.2.yaml | sed 's/namespace: .*/namespace: kafka/' | oc apply -n kafka -f -
-```
+- Store streams of records in a fault-tolerant durable way.
 
-Wait for the strimzi-cluster-operator to be running:
+- Process streams of records as they occur.
 
-kubectl
+- Kafka is generally used for two broad classes of applications:
 
-oc
+- Building real-time streaming data pipelines that reliably get data between systems or applications
 
-watch oc get pods -n kafka
+- Building real-time streaming applications that transform or react to the streams of data
 
-The command should show the following output:
+## 2. What is Strimzi?
 
-NAME                                        READY STATUS    AGE
-strimzi-cluster-operator-85f596bfc7-7dgds   1/1   Running   1m2s
-The strimzi operator would have installed several Apache Kafka related CRDs which can be used to create Apache Kafka core resources such as a topic, users, connectors etc., you can verify the CRDs that are available by querying api-resources:
+Strimzi provides a way to run an Apache Kafka cluster on Kubernetes in various deployment configurations.
 
-kubectl
+Strimzi is based on Apache Kafka, and makes it easy to run Apache Kafka on OpenShift or Kubernetes.
 
-oc
+Strimzi provides three operators:
 
-oc api-resources --api-group='kafka.strimzi.io'
+- **Cluster Operator** - Responsible for deploying and managing Apache Kafka clusters within an OpenShift or Kubernetes cluster.
 
-The command should show the following output:
+- **Topic Operator** - Responsible for managing Kafka topics within a Kafka cluster running within an OpenShift or Kubernetes cluster.
 
-kafkabridges.kafka.strimzi.io                        2019-12-28T14:53:14Z
-kafkaconnects.kafka.strimzi.io                       2019-12-28T14:53:14Z
-kafkaconnects2is.kafka.strimzi.io                    2019-12-28T14:53:14Z
-kafkamirrormakers.kafka.strimzi.io                   2019-12-28T14:53:14Z
-kafkas.kafka.strimzi.io                              2019-12-28T14:53:14Z
-kafkatopics.kafka.strimzi.io                         2019-12-28T14:53:14Z
-kafkausers.kafka.strimzi.io                          2019-12-28T14:53:14Z
-Now with the Apache Kafka operator running, you can deploy and verify a single node Apache Kakfa cluster by running the command:
+- **User Operator** - Responsible for managing Kafka users within a Kafka cluster running within an OpenShift or Kubernetes cluster.
 
-kubectl
+## 3. The Goal
 
-oc
+In this exercise, we are going to generate (random) names in one component. These names are written in a Kafka topic (`names`). A second component reads from the `names` Kafka topic and applies some magic conversion to the name (adding an honorific). The result is sent to an in-memory stream consumed by a JAX-RS resource. The data is sent to a browser using `server-sent events` and displayed in the browser. It will look like this:
 
-oc -n kafka apply -f kafka-broker-my-cluster.yaml
+## 4. Create Kafka Cluster
 
-Watch the Kafka cluster deployment:
+The Strimzi operator installs and manages Kafka clusters on Kubernetes. You can go to "Operator Hub" and install the AMQ-Streams operator very easily. 
+Open [the AMQ-Streams blog](https://middlewareblog.redhat.com/2019/12/10/getting-started-with-the-red-hat-amq-streams-operator/) in your browser. 
 
-oc kubectl get pods -n kafka
+First, on the OpenShift Developer view, click **+Add** and, then From Catalog:
 
-Watch the kafka namespace for the cluster deployment:
+![Diagram](docs/10-01.png)
 
-NAME                                         READY  STATUS   AGE
-my-cluster-entity-operator-7d677bdf7b-jpws7  3/3    Running  85s
-my-cluster-kafka-0                           2/2    Running  110s
-my-cluster-zookeeper-0                       2/2    Running  2m22s
-strimzi-cluster-operator-85f596bfc7-7dgds    1/1    Running  4m22s
-The Kubernetes CRD resource $TUTORIAL_HOME/eventing/kafka-broker-my-cluster.yaml, will deploy a single Zookeeper, Kafka Broker and a Entity-Operator. The Entity-Operator is responsible for managing different custom resources such as KafkaTopic and KafkaUser.
+Type in `kafka` in the keyword filter box:
 
-Now that you have an Apache Kafka cluster deployed, you can create a Kafka Topic using the KafkaTopic CRD, the following listing shows how to create a Kafka Topic my-topic:
+![Diagram](docs/10-02.png)
 
-Create Kafka Topic my-topic
-apiVersion: kafka.strimzi.io/v1beta1
-kind: KafkaTopic
-metadata:
-  name: my-topic
-  labels:
-    strimzi.io/cluster: my-cluster
-spec:
-  partitions: 10 
-  replicas: 1
-Partitions 10 allows for more concurrent scale-out of sink pods. In theory, up to 10 pods will scale-up if there are enough messages flowing through the Kafka topic.
-You can choose to skip the manual pre-creation of a KafkaTopic but the automatically generated topics will have partitions set to 1 by default.
+These are all of the Kafka cluster elements you can install. Click on **Kafka**, and then click on **Create**. This will open a yaml file for you to configure the cluster before it’s installed. Change the name of the cluster from `my-cluster` to `names-cluster` (under the metadata section of the YAML file). Leave all other values as-is, and click **Create**:
 
-Create Kafka Topic
-kubectl
+![Diagram](docs/10-03.png)
 
-oc
+This will create a new Kafka Kubernetes object in your namespace, triggering the Operator to deploy Kafka.
 
-kubectl -n kafka create -f kafka-topic-my-topic.yaml
+## 5. Create Kafka Topic
 
-Verify the created topic:
+Follow the same process to create a Kafka Topic:
 
-kubectl -n kafka  get kafkatopics
+Click **+Add** on the left again, select **From Catalog**, and enter `topic` into the search box. Click on the *Kafka Topic* box, then click **Create**:
 
-The verify command should show the following output:
+![Diagram](docs/10-04.png)
 
-NAME       PARTITIONS   REPLICATION FACTOR
-my-topic   10           1
-Verify that your Kafka Topic is working correctly by connecting a simple producer, consumer and creating some test messages. The sample code repository includes a script for producing Kafka messages called kafka-producer.sh. Execute the script and type in "one", "two", "three". Hitting enter/return after each string:
+We’ll need to create a topic for our application to stream to and from, so in the YAML:
 
-Producer
-$TUTORIAL_HOME/bin/kafka-producer.sh
+- Change the metadata > name value from `my-topic` to `names`.
 
-On the terminal prompt try entering texts like:
+- Change the vale of the `strimzi.io/cluster` label from `my-cluster` to `names-cluster`
 
->one
->two
->three
-Consumer
-You should also leverage the sample code repository’s kafka-consumer.sh script to see the message flow through the topic, open a new terminal and run:
+Then click **Create**.
 
-$TUTORIAL_HOME/bin/kafka-consumer.sh
+![Diagram](docs/10-05.png)
 
-On the consumer terminal prompt you will receive texts like:
+This will cause the Operator to provision a new Topic in the Kafka cluster.
 
->one
->two
->three
-You can use Ctrl-c to stop producer & consumer interaction and their associated pods.
+Back on the OpenShift console, Developer view, make sure all the Kafka and Zookeeper pods are up and running (with dark blue circles):
 
-Knative Tutorial
-Apache Kafka Events with Knative Eventing
-At the end of this chapter you will be able to:
+![Diagram](docs/10-06.png)
 
-Using KafkaSource with Knative Eventing
+It may take a few minutes for all of the pods to appear spin up. You can continue to the next step while the Kafka cluster and topics are created.
 
-Source Kafka Events to Sink
-
-Autocaling Knative Services with Apache Kafka Events
-
-Prerequisite
-The following checks ensure that each chapter exercises are done with the right environment settings.
-
-Minikube
-
-Minishift
-
-Set your local docker to use minishift docker daemon
-
-eval $(minishift docker-env)
-
-OpenShift CLI should be v3.11.0+
-
-eval $(minishift oc-env)
-oc version
-
-Make sure to be on knativetutorial OpenShift project
-
-oc project -q
+## 6. Knativetutorial project
 
 If you are not on knativetutorial project, then run following command to change to knativetutorial project:
 
