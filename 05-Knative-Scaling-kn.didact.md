@@ -140,7 +140,7 @@ Check out the Knative `scaling/service-min-max-scale.yaml` ([open](didact://?com
 The service can be deployed using the following command:
 
 ```
-oc apply -n knativetutorial -f scaling/service-10.yaml
+oc apply -n knativetutorial -f scaling/service-min-max-scale.yaml
 ```
 
 ([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=knTerm$$oc%20apply%20-n%20knativetutorial%20-f%20scaling/service-min-max-scale.yaml&completion=Run%20oc%20apply%20command. "Opens a new terminal and sends the command above"){.didact})
@@ -154,6 +154,14 @@ oc get deployments -n knativetutorial
 ([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$oc%20get%20deployments%20-n%20knativetutorial&completion=Run%20oc%20get%20deployments%20command. "Opens a new terminal and sends the command above"){.didact})
 
 The deployment of this service will always have a minimum of 2 pods.
+
+Run the command to Invoke the service deployed
+
+```
+export SVC_URL=`oc get rt prime-generator -o yaml | yq read - 'status.url'`
+```
+([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=curlTerm$$export%20SVC_URL%3D%60oc%20get%20rt%20prime-generator%20-o%20yaml%20%7C%20yq%20read%20-%20%27status.url%27;echo%20''%60&completion=Invoke%20Knative%20deployment. "Opens a new terminal and sends the command above"){.didact})
+
 
 Will allow each service pod to handle max of 10 in-flight requests per pod before automatically scaling to new pods.
 Let us send some load to the service to trigger autoscaling.
@@ -186,3 +194,8 @@ You can delete the deployed knative service using the command below
 oc -n knativetutorial delete services.serving.knative.dev greeter &&\
 ```
 ([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$oc%20--namespace%20knativetutorial%20delete%20services.serving.knative.dev%20greeter&completion=Run%20oc%20delete%20kn-services%20command. "Opens a new terminal and sends the command above"){.didact})
+
+```
+oc -n knativetutorial delete services.serving.knative.dev prime-generator &&\
+```
+([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$oc%20--namespace%20knativetutorial%20delete%20services.serving.knative.dev%20prime-generator&completion=Run%20oc%20delete%20kn-services%20command. "Opens a new terminal and sends the command above"){.didact})
