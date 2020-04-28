@@ -150,12 +150,12 @@ Add -oyaml to the above commands to get more details about each object that were
 ## 6. Cleanup
 
 ```
-oc apply -n knativetutorial -f eventing/channel.yaml
+oc -n knativetutorial delete -f eventing/channel.yaml
 ```
 ([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$oc%20--namespace%20knativetutorial%20delete%20-f%20eventing/channel.yaml&completion=Run%20oc%20delete%20kn-services%20command. "Opens a new terminal and sends the command above"){.didact})
 
 ```
-oc apply -n knativetutorial -f eventing/channel-subscriber.yaml
+oc -n knativetutorial delete -f eventing/channel-subscriber.yaml
 ```
 ([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$oc%20--namespace%20knativetutorial%20delete%20-f%20eventing/channel-subscriber.yaml&completion=Run%20oc%20delete%20kn-services%20command. "Opens a new terminal and sends the command above"){.didact})
 ```
