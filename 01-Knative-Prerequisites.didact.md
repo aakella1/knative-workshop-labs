@@ -43,7 +43,7 @@ Open a terminal tab and type the following command:
 oc project knativetutorial
 ```
 
-([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$oc%20project%20kameldemo&completion=Use%20your%20namespace. "Opens a new terminal and sends the command above"){.didact})
+([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$oc%20project%20knativetutorial&completion=Use%20your%20namespace. "Opens a new terminal and sends the command above"){.didact})
 
 
 ## 3. Install OpenShift ServiceMesh Operator
