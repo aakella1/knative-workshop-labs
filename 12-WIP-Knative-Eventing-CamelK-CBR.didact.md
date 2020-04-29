@@ -1,158 +1,166 @@
-Knative Tutorial
-Applying Content Based Routing EIP
+# Applying Content Based Routing EIP
+
 At the end of this chapter you will be able to:
 
-How to run integrate Apache Kafka and Camel-K
+- How to run integrate Apache Kafka and Camel-K
 
-Apply Content Based Routing (CBR) Enterprise Integration Pattern(EIP)
+- Apply Content Based Routing (CBR) Enterprise Integration Pattern(EIP)
 
-Apache Camel supports numerous Enterprise Integration Patterns (EIPs) out-of-the-box, you can find the complete list of patterns on the Apache Camel website.
+- Apache Camel supports numerous Enterprise Integration Patterns (EIPs) out-of-the-box, you can find the complete list of patterns on the Apache Camel website.
 
-Content Based Router
-The Content Based Router examines the message content and routes the message to a different channel based on the data contained in the message. The routing can be based on a number of criteria such as existence of fields, specific field values etc. When implementing a Content Based Router, special caution should be taken to make the routing function easy to maintain as the router can become a point of frequent maintenance. In more sophisticated integration scenarios, the Content Based Router can take on the form of a configurable rules engine that computes the destination channel based on a set of configurable rules. [1]
+> **Content Based Router**
+> The Content Based Router examines the message content and routes the message to a different channel based on the data contained in the message. The routing can be based on a number of criteria such as existence of fields, specific field values etc. When implementing a Content Based Router, special caution should be taken to make the routing function easy to maintain as the router can become a point of frequent maintenance. In more sophisticated integration scenarios, the Content Based Router can take on the form of a configurable rules engine that computes the destination channel based on a set of configurable rules. [1]
 
-Application Overview
-We will deploy a simple data streaming application that will use Camel-K and Knative to process the incoming data where that processed data is pushed out to to a reactive web application via Server-Sent Events (SSE) as shown below:
+## 1. Prerequisites
 
-cbr app overview
-Figure 1. Application Overview
-The application has following components,
+Make sure you completed all the steps in the Prerequistes lab.
 
-Data Producer: The Camel-K integration application, that will produce data simulating the streaming data by sending the data to Apache Kafka
+Use `oc` client on your terminal to navigate to `knativetutorial` project
 
-Data Processor: The Camel-K integration application, that will process the streaming data from Kafka and send the default Knative Eventing Broker
-
-Event Subscriber(Fruits UI): The Quarkus Java application, that will display the processed data from the Data Processor
-
-Event Trigger: This is Knative Event Trigger that apply a filter on the processed data, to send to the Event Subscriber
-
-The upcoming recipes will deploy these individual components and finally we test the integration by wiring them all together.
-
-Prerequisite
-The following checks ensure that each chapter exercises are done with the right environment settings.
-
-Minikube
-
-Minishift
-
-Set your local docker to use minishift docker daemon
-
-eval $(minishift docker-env)
-
-OpenShift CLI should be v3.11.0+
-
-eval $(minishift oc-env)
-oc version
-
-Make sure to be on knativetutorial OpenShift project
-
-oc project -q
-
-If you are not on knativetutorial project, then run following command to change to knativetutorial project:
-
+```
 oc project knativetutorial
+```
+([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$oc%20project%20knativetutorial&completion=Run%20oc%20project%20command. "Opens a new terminal and sends the command above"){.didact})
 
 Just make sure:
 
-Review Knative Eventing module to refresh the concepts
+- Review Knative Eventing module to refresh the concepts
 
-Apache Kafka my-cluster is running
+- Apache Kafka my-cluster is running
 
-Finally navigate to the tutorial chapter’s folder advanced/camel-k:
+- Camel-K operator is installed (as shown in the prerequisites lab)
 
-cd $TUTORIAL_HOME/advanced/camel-k
+## 2. Application Overview
 
-Label Namespace
-The knativetutorial namespace is labeled to inject Knative Eventing’s default Broker filter and ingress deployment.
+We will deploy a simple data streaming application that will use Camel-K and Knative to process the incoming data where that processed data is pushed out to to a reactive web application via Server-Sent Events (SSE) as shown below:
 
-kubectl
+![Diagram](docs/12-01.png)
 
-oc
+The application has following components,
 
+- **Data Producer**: The Camel-K integration application, that will produce data simulating the streaming data by sending the data to Apache Kafka
+
+- **Data Processor**: The Camel-K integration application, that will process the streaming data from Kafka and send the default Knative Eventing Broker
+
+- **Event Subscriber(Fruits UI)**: The Quarkus Java application, that will display the processed data from the Data Processor
+
+- **Event Trigger**: This is Knative Event Trigger that apply a filter on the processed data, to send to the Event Subscriber
+
+The upcoming recipes will deploy these individual components and finally we test the integration by wiring them all together.
+
+## 3. Label Namespace
+
+The `knativetutorial` namespace is labeled to inject Knative Eventing’s default Broker filter and ingress deployment.
+```
 oc label namespace knativetutorial knative-eventing-injection=enabled
+```
+([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$kubectl%20label%20namespace%20knativetutorial%20knative-eventing-injection=enabled&completion=Run%20kubectl%20command. "Opens a new terminal and sends the command above"){.didact})
 
-If the label is set correctly on the knativetutorial namespace then you should see the following pods corresponding to Knative Eventing’s default broker’s filter and ingress:
+Verify that the default broker is running:
 
-kubectl
+```
+watch oc --namespace knativetutorial get broker
+```
+([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$watch%20oc%20-n%20knativetutorial%20get%20broker&completion=Run%20oc%20get%20pods%20command. "Opens a new terminal and sends the command above"){.didact})
 
-oc
 
-watch oc get pods -n knativetutorial
+Running command above should show an output like:
+```
+NAME     READY REASON URL                                                 AGE
+default  True         http://default-broker.knativetutorial.svc.cluster.local   22s
+```
+**To exit and terminate the execution**, [just click here](didact://?commandId=vscode.didact.sendNamedTerminalCtrlC&text=ocTerm&completion=loop%20interrupted. "Interrupt the current operation on the terminal"){.didact}
 
+or hit `ctrl+c` on the terminal window.
+
+This will also start two additional pods namely `default-broker-filter` and `default-broker-ingress` :
+
+```
+watch -n knativetutorial oc get pods
+```
+([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$watch%20oc%20-n%20knativetutorial%20get%20pods&completion=Run%20oc%20get%20pods%20command. "Opens a new terminal and sends the command above"){.didact})
+
+**To exit and terminate the execution**, [just click here](didact://?commandId=vscode.didact.sendNamedTerminalCtrlC&text=ocTerm&completion=loop%20interrupted. "Interrupt the current operation on the terminal"){.didact}
+
+or hit `ctrl+c` on the terminal window.
+
+Running command above should show the following pods in `knativetutorial`:
+```
 NAME                                       READY   STATUS      AGE
-camel-k-operator-5d74595cdf-4v9qz          1/1     Running     3h59m
 default-broker-filter-c6654bccf-zkw7s      1/1     Running     59s
 default-broker-ingress-857698bc5b-r4zmf    1/1     Running     59s
-Deploy Data Producer
+```
+
+## 3. Deploy Data Producer
+
 Knative Camel-K integration called fruits-producer which will use a public fruits API to retrieve the information about fruits and stream the data to Apache Kafka. The fruits-producer service retrieves the data from the fruits API, splits it using the Split EIP and then sends the data to a Kafka topic called fruits.
 
-Fruits producer
-- from:
-    uri: "knative:endpoint/fruits-producer"
-    steps:
-      - set-header:
-          name: CamelHttpMethod
-          constant: GET
-      - to: "http:fruityvice.com/api/fruit/all?bridgeEndpoint=true" 
-      - split:
-          jsonpath: "$.[*]" 
-      - marshal:
-          json: {}
-      - log:
-          message: "${body}"
-      - to: "kafka:fruits?brokers=my-cluster-kafka-bootstrap.kafka:9092" 
-Call the external REST API http://fruityvice.com to get the list of fruits to simulate the data streaming
-Apply the Camel Split EIP to split the JSON array to individual records
-Send the processed data i.e. the individual fruit record as JSON to Apache Kafka Topic
-Run the following command to deploy the fruit-producer integration:
+Check out the Knative `advanced/camel-k/eip/fruits-producer.yaml` ([open](didact://?commandId=vscode.openFolder&projectFilePath=advanced/camel-k/eip/fruits-producer.yaml&completion=Opened%20the%20advanced/camel-k/eip/fruits-producer.yaml%20file "Opens the advanced/camel-k/eip/fruits-producer.yaml file"){.didact}):
 
+You notice the following functionality
+- Call the external REST API http://fruityvice.com to get the list of fruits to simulate the data streaming
+- Apply the Camel Split EIP to split the JSON array to individual records
+- Send the processed data i.e. the individual fruit record as JSON to Apache Kafka Topic
+
+Run the following command to deploy the `fruit-producer` integration:
+
+```
 kamel -n knativetutorial run \
  --wait \
  --dependency camel:log \
  --dependency camel:jackson \
  --dependency camel:jsonpath \
- eip/fruits-producer.yaml
+  advanced/camel-k/eip/fruits-producer.yaml
+```
+([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=knTerm$$kamel%20-n%20knativetutorial%20run%20--wait%20--dependency%20camel%3Alog%20--dependency%20camel%3Ajackson%20--dependency%20camel%3Ajsonpath%20advanced%2Fcamel-k%2Feip%2Ffruits-producer.yaml&completion=Run%20kamel%20command. "Opens a new terminal and sends the command above"){.didact})
 
-The service deployment may take several minutes to become available, to monitor the status:
+> The service deployment may take several minutes to become available, to monitor the status:
+>
+> - watch kubectl get pods or watch oc get pods
+>
+> - watch kamel get
+>
+> - watch kubectl get ksvc or watch oc get ksvc
 
-watch kubectl get pods or watch oc get pods
-
-watch kamel get
-
-watch kubectl get ksvc or watch oc get ksvc
-
-kubectl
-
-oc
-
+```
 watch oc -n knativetutorial get pods
+```
+([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$watch%20oc%20-n%20knativetutorial%20get%20pods&completion=Run%20oc%20get%20pods%20command. "Opens a new terminal and sends the command above"){.didact})
+
+**To exit and terminate the execution**, [just click here](didact://?commandId=vscode.didact.sendNamedTerminalCtrlC&text=ocTerm&completion=loop%20interrupted. "Interrupt the current operation on the terminal"){.didact}
+
+or hit `ctrl+c` on the terminal window.
 
 A successful deploy will show the following pods:
-
-fruits-producer service pods
+```
 NAME                                                READY   STATUS    AGE
 camel-k-operator-5d74595cdf-4v9qz                   1/1     Running   4h4m
 default-broker-filter-c6654bccf-zkw7s               1/1     Running   5m
 default-broker-ingress-857698bc5b-r4zmf             1/1     Running   5m
 fruits-producer-nfngm-deployment-759c797c44-d6r52   2/2     Running   70s
-kubectl
-
-oc
-
+```
+Lets have a look at the knative services too
+```
 oc -n knativetutorial get ksvc
+```
+([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$oc%20-n%20knativetutorial%20get%20ksvc&completion=Run%20oc%20get%20ksvc%20command. "Opens a new terminal and sends the command above"){.didact})
 
-fruit-producer Knative services
+```
 NAME              URL                                            READY
 event-display     http://event-display.knativetutorial.example.com     True
 fruits-producer   http://fruits-producer.knativetutorial.example.com   True
-Verify Fruit Producer
-Run the $TUTORIAL_HOME/bin/call.sh with the parameter fruits-producer.
+```
 
-$TUTORIAL_HOME/bin/call.sh fruits-producer ''
+## 4. Verify Fruit Producer
 
-Open a new terminal and run the start Kafka consumer using the script $TUTORIAL_HOME/bin/kafka-consumer.sh with parameter fruits:
+Run the `bin/call.sh` with the parameter fruits-producer.
 
-$TUTORIAL_HOME/bin/kafka-consumer.sh fruits
+```
+bin/call.sh fruits-producer ''
+```
+Open a new terminal and run the start Kafka consumer using the script $TUTORIAL_HOME/bin/kafka-consumer.sh with parameter names:
+
+$TUTORIAL_HOME/bin/kafka-consumer.sh names
 
 If the fruit-producer executed well then you should the Kafka Consumer terminal show something like:
 

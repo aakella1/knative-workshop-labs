@@ -11,4 +11,4 @@
           json: {}
       - log:
           message: "${body}"
-      - to: "kafka:fruits?brokers=my-cluster-kafka-bootstrap.kafka:9092"
+      - to: "kafka:fruits?brokers=names-cluster-kafka-bootstrap-knativetutorial.apps.cluster-alpha-ef42.alpha-ef42.example.opentlc.com:9092"
