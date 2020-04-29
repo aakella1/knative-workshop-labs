@@ -30,9 +30,9 @@ kubectl label namespace knativetutorial knative-eventing-injection=enabled
 Verify that the default broker is running:
 
 ```
-watch oc --namespace knativetutorial get broker
+oc -n knativetutorial get pods -w
 ```
-([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$watch%20oc%20-n%20knativetutorial%20get%20broker&completion=Run%20oc%20get%20pods%20command. "Opens a new terminal and sends the command above"){.didact})
+([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$oc%20-n%20knativetutorial%20get%20broker%20-w&completion=Run%20oc%20get%20pods%20command. "Opens a new terminal and sends the command above"){.didact})
 
 
 Running command above should show an output like:
@@ -99,7 +99,7 @@ The type is the `CloudEvent` type that is mapped to the `ce-type` HTTP header. A
 Run the following commands to create the trigger:
 
 ```
-oc apply -n knativetutorial -f trigger-helloaloha.yaml
+oc apply -n knativetutorial -f eventing/trigger-helloaloha.yaml
 ```
 ([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=knTerm$$oc%20apply%20-n%20knativetutorial%20-f%20eventing/trigger-helloaloha.yaml&completion=Run%20oc%20apply%20command. "Opens a new terminal and sends the command above"){.didact})
 
@@ -110,7 +110,7 @@ Now create the the trigger for `eventingbonjour` that will associate the filtere
 Run the following commands to create the trigger:
 
 ```
-oc apply -n knativetutorial -f trigger-hellobonjour.yaml
+oc apply -n knativetutorial -f eventing/trigger-hellobonjour.yaml
 ```
 ([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=knTerm$$oc%20apply%20-n%20knativetutorial%20-f%20eventing/trigger-hellobonjour.yaml&completion=Run%20oc%20apply%20command. "Opens a new terminal and sends the command above"){.didact})
 
@@ -176,7 +176,7 @@ Then create a curler pod for using the curl command: Open eventing/curler.yaml (
 
 Create the curler pod:
 ```
-oc -n knativetutorial apply -f curler.yaml
+oc -n knativetutorial apply -f eventing/curler.yaml
 ```
 ([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=knTerm$$oc%20apply%20-n%20knativetutorial%20-f%20eventing/curler.yaml&completion=Run%20oc%20apply%20command. "Opens a new terminal and sends the command above"){.didact})
 
@@ -292,17 +292,17 @@ oc -n knativetutorial delete -f eventing-bonjour-sink.yaml
 ([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$oc%20--namespace%20knativetutorial%20delete%20-f%20eventing/eventing-bonjour-sink.yaml&completion=Run%20oc%20delete%20kn-services%20command. "Opens a new terminal and sends the command above"){.didact})
 
 ```
-oc -n knativetutorial delete -f trigger-helloaloha.yaml
+oc -n knativetutorial delete -f eventing/trigger-helloaloha.yaml
 ```
 ([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$oc%20--namespace%20knativetutorial%20delete%20-f%20eventing/trigger-helloaloha.yaml&completion=Run%20oc%20delete%20kn-services%20command. "Opens a new terminal and sends the command above"){.didact})
 
 ```
-oc -n knativetutorial delete -f trigger-hellobonjour.yaml
+oc -n knativetutorial delete -f eventing/trigger-hellobonjour.yaml
 ```
 ([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$oc%20--namespace%20knativetutorial%20delete%20-f%20eventing/trigger-hellobonjour.yaml&completion=Run%20oc%20delete%20kn-services%20command. "Opens a new terminal and sends the command above"){.didact})
 
 ```
-oc -n knativetutorial delete -f eventinghello-source.yaml
+oc -n knativetutorial delete -f eventing/eventinghello-source.yaml
 ```
 ([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$oc%20--namespace%20knativetutorial%20delete%20-f%20eventing/eventinghello-source.yaml&completion=Run%20oc%20delete%20kn-services%20command. "Opens a new terminal and sends the command above"){.didact})
 
