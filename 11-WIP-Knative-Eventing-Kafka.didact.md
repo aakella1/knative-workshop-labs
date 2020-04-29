@@ -14,7 +14,7 @@ At the end of this chapter you will be able to:
 
 - Make sure the Kafka cluster is setup on OpenShift
 
-## 2. Deploy Knative Eventing KafkaSource
+## 2. Install Knative Apache Kafka Operator
 
 Make sure to be on `knative-eventing` OpenShift project
 
@@ -25,8 +25,6 @@ oc project knative-eventing
 ```
 
 ([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$oc%20project%20knative-eventing&completion=Use%20your%20namespace. "Opens a new terminal and sends the command above"){.didact})
-
-Deploy Knative Eventing KafkaSource : This need to be used to have the Kafka messages to flow through the Knative Eventing Channels. Use the OperatorHub in OpenShift web console to install Knative Eventing Kafka operator that will install the KafkaSource.
 
 You can get more information from [Knative Apache Kafka Operator](https://openshift-knative.github.io/docs/docs/proc_apache-kafka.html "Install Knative Apache Kafka Operator").
 
@@ -51,21 +49,6 @@ kafka-ch-controller-57cf94b477-sf26c        1/1     Running   0          7h51m
 kafka-controller-manager-56d58bb444-bfvch   1/1     Running   0          7h51m
 kafka-webhook-77b75f7c7f-c7crr              1/1     Running   0          7h51m
 ```
-
-Now, make sure to be on knativetutorial OpenShift project
-
-Open a terminal tab and type the following command:
-
-```
-oc project knativetutorial
-```
-
-([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$oc%20project%20kameldemo&completion=Use%20your%20namespace. "Opens a new terminal and sends the command above"){.didact})
-Deploy the `kafkasource` now using the steps below in the `knativetutorial` namespace
-
-![Diagram](docs/11-01.png)
-
-![Diagram](docs/11-02.png)
 
 You should also find some api-resources as shown:
 
@@ -146,6 +129,7 @@ oc -n knativetutorial delete -f channels.messaging.knative.dev my-events-ch
 ([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$oc%20-n%20knativetutorial%20delete%20-f%20channels.messaging.knative.dev%20my-events-ch&completion=Run%20oc%20delete%20command. "Opens a new terminal and sends the command above"){.didact})
 
 ## 4. Connecting Kafka Source to Sink
+
 Now, all of your infrastructure is configured, you can deploy the Knative Serving Service(sink) by running the command:
 
 ```
@@ -174,34 +158,28 @@ stern eventinghello -c user-container
 
 The initial deployment of `eventinghello` will cause it to scale up to 1 pod. It will be around until it hits its scale-down time limit. Allow it to scale down to zero pods before continuing.
 
-Create a KafkaSource for `my-topic` by connecting your Kafka topic `my-topic` to `eventinghello`:
+## 5. Deploy Knative Eventing KafkaSource
+
+KafkaSource need to be created to have the Kafka messages to flow through the Knative Eventing Channels. 
+
+Make sure to be on knativetutorial OpenShift project
+
+Open a terminal tab and type the following command:
 
 ```
-apiVersion: sources.eventing.knative.dev/v1alpha1
-kind: KafkaSource
-metadata:
-  name: mykafka-source
-spec:
-  consumerGroup: knative-group
-  bootstrapServers: my-cluster-kafka-bootstrap.kafka:9092 
-  topics: my-topic 
-  sink: 
-    ref:
-      apiVersion: serving.knative.dev/v1
-      kind: Service
-      name: eventinghello
+oc project knativetutorial
 ```
 
-"my-cluster-kafka-bootstrap:9092" can be found via kubectl get -n kafka services or oc get -n kafka services
+([^ execute](didact://?commandId=vscode.didact.sendNamedTerminalAString&text=ocTerm$$oc%20project%20knativetutorial&completion=Use%20your%20namespace. "Opens a new terminal and sends the command above"){.didact})
 
-my-topic was created earlier section when deploying Apache Kafka
-This is another example of a direct Source to Sink
+Deploy the `kafkasource` now using the steps below in the `knativetutorial` namespace
+
+![Diagram](docs/11-01.png)
+
+![Diagram](docs/11-02.png)
 
 The deployment of KafkaSource will result in a new pod prefixed with "mykafka-source".
 
-```
-oc -n knativetutorial apply -f mykafka-source.yaml
-```
 Give it a few seconds and run
 ```
 oc get pods
@@ -215,7 +193,7 @@ mykafka-source-vxs2k-56548756cc-j7m7v         1/1    Running  0         11s
 
 Since we had test messages of "one", "two" and "three" from earlier you might see the eventinghello service awaken to process those messages.
 
-Wait for eventinghello to scale down to zero pods before moving on then push more Kafka messages into `my-topic`.
+Wait for eventinghello to scale down to zero pods before moving on then push more Kafka messages into `names`.
 
 ```
 bin/kafka-producer.sh
@@ -253,7 +231,7 @@ POST:{"hey": "duniya"}
 The sample output has been modified for readability and formatting reasons. You can see the logging output of all your JSON-based event input in the terminal where you are watching the eventinghello logs.
 ```
 
-## 7. Cleanup
+## 5. Cleanup
 
 ```
 oc delete -n knativetutorial  -f eventing/mykafka-source.yaml

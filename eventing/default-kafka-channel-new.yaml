@@ -4,4 +4,4 @@ metadata:
   name: default-ch-webhook
   namespace: knativetutorial
 data:
-  bootstrapServers: my-cluster-kafka-bootstrap.knativetutorial:9092
+  bootstrapServers: names-cluster-kafka-bootstrap-knativetutorial.apps.cluster-alpha-ef42.alpha-ef42.example.opentlc.com:9092
