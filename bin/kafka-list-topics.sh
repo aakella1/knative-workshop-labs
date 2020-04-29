@@ -4,7 +4,7 @@ set -e
 trap '{ echo "" ; exit 1; }' INT
 
 KAFKA_CLUSTER_NS=${1:-'knativetutorial'}
-KAFKA_CLUSTER_NAME=${2:-'my-cluster'}
+KAFKA_CLUSTER_NAME=${2:-'names-cluster'}
 
 #pod_number=$(shuf -i 0-1 -n 1)
 kubectl exec -it "$KAFKA_CLUSTER_NAME-kafka-0" \

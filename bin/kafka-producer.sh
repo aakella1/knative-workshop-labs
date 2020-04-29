@@ -3,9 +3,9 @@ set -e
 
 trap '{ echo "" ; exit 1; }' INT
 
-KAFKA_TOPIC=${1:-'my-topic'}
+KAFKA_TOPIC=${1:-'names'}
 KAFKA_CLUSTER_NS=${2:-'knativetutorial'}
-KAFKA_CLUSTER_NAME=${3:-'my-cluster'}
+KAFKA_CLUSTER_NAME=${3:-'names-cluster'}
 
 
 kubectl -n $KAFKA_CLUSTER_NS run kafka-producer -ti \
